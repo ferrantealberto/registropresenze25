@@ -2,10 +2,10 @@ import { useState, useRef, useEffect } from 'react';
 import Modal from 'react-modal';
 import { format } from 'date-fns';
 import { it } from 'date-fns/locale';
-import { FileText, Printer, X } from 'lucide-react';
+import { FileText, Printer, X, Save, Edit2 } from 'lucide-react';
 import { useReactToPrint } from 'react-to-print';
 import html2pdf from 'html2pdf.js';
-import { collection, query, where, getDocs } from 'firebase/firestore';
+import { collection, query, where, getDocs, doc, updateDoc } from 'firebase/firestore';
 import { db } from '../../lib/firebase';
 import toast from 'react-hot-toast';
 
@@ -44,15 +44,99 @@ if (typeof window !== 'undefined') {
 export default function PrintRegistersModal({ isOpen, onClose }: PrintRegistersModalProps) {
   const [loading, setLoading] = useState(false);
   const [registers, setRegisters] = useState<any[]>([]);
+  const [editingRegister, setEditingRegister] = useState<string | null>(null);
+  const [editedActivity, setEditedActivity] = useState('');
+  const [editedStartTime, setEditedStartTime] = useState('');
+  const [editedEndTime, setEditedEndTime] = useState('');
   const reportRef = useRef<HTMLDivElement>(null);
 
   const fetchRegisters = async () => {
     setLoading(true);
     try {
-      const q = query(
-        collection(db, 'lessons'),
-        where('attendanceVerified', '==', true)
-      );
+      // First get all verified lessons
+      const lessonsQuery = query(collection(db, 'lessons'), where('attendanceVerified', '==', true));
+      const lessonsSnapshot = await getDocs(lessonsQuery);
+      const lessons = lessonsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+
+      // For each lesson, get the attendance records
+      const registersWithData = await Promise.all(lessons.map(async (lesson) => {
+        const attendanceQuery = query(
+          collection(db, 'attendance'),
+          where('date', '==', lesson.date),
+          where('school', '==', lesson.school),
+          where('class', '==', lesson.class)
+        );
+        const attendanceSnapshot = await getDocs(attendanceQuery);
+        const students = attendanceSnapshot.docs.map(doc => ({
+          id: doc.id,
+          ...doc.data()
+        }));
+
+        // Get activity details
+        const activityQuery = query(
+          collection(db, 'activities'),
+          where('date', '==', lesson.date),
+          where('school', '==', lesson.school),
+          where('class', '==', lesson.class)
+        );
+        const activitySnapshot = await getDocs(activityQuery);
+        const activity = activitySnapshot.docs[0]?.data() || null;
+
+        return {
+          ...lesson,
+          students,
+          activity
+        };
+      }));
+
+      setRegisters(registersWithData);
+    } catch (error) {
+      console.error('Error fetching registers:', error);
+      toast.error('Errore nel recupero dei registri');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleEditStart = (register: any) => {
+    setEditingRegister(register.id);
+    setEditedStartTime(register.startTime);
+    setEditedEndTime(register.endTime);
+    setEditedActivity(register.activity?.description || '');
+  };
+
+  const handleSaveChanges = async (registerId: string) => {
+    try {
+      await updateDoc(doc(db, 'lessons', registerId), {
+        startTime: editedStartTime,
+        endTime: editedEndTime
+      });
+
+      if (editedActivity) {
+        const register = registers.find(r => r.id === registerId);
+        const activityRef = doc(db, 'activities', register.activity.id);
+        await updateDoc(activityRef, {
+          description: editedActivity,
+          startTime: editedStartTime,
+          endTime: editedEndTime
+        });
+      }
+
+      toast.success('Modifiche salvate con successo');
+      setEditingRegister(null);
+      fetchRegisters();
+    } catch (error) {
+      console.error('Error saving changes:', error);
+      toast.error('Errore durante il salvataggio delle modifiche');
+    }
+  };
+
+  const handleCancelEdit = () => {
+    setEditingRegister(null);
+    setEditedStartTime('');
+    setEditedEndTime('');
+    setEditedActivity('');
+  };
       const querySnapshot = await getDocs(q);
       const fetchedRegisters = querySnapshot.docs.map(doc => ({
         id: doc.id,
@@ -171,9 +255,42 @@ export default function PrintRegistersModal({ isOpen, onClose }: PrintRegistersM
                         <div className="flex flex-col">
                           <div className="flex items-center gap-4 text-sm font-semibold">
                             <span>REGISTRO GIORNALIERO - data: {format(register.date.toDate(), 'dd/MM/yyyy', { locale: it })}</span>
-                            <span>DALLE ORE: {register.startTime}</span>
-                            <span>ALLE ORE: {register.endTime}</span>
+                            {editingRegister === register.id ? (
+                              <>
+                                <div>
+                                  <span>DALLE ORE: </span>
+                                  <input
+                                    type="time"
+                                    value={editedStartTime}
+                                    onChange={(e) => setEditedStartTime(e.target.value)}
+                                    className="border rounded px-2 py-1"
+                                  />
+                                </div>
+                                <div>
+                                  <span>ALLE ORE: </span>
+                                  <input
+                                    type="time"
+                                    value={editedEndTime}
+                                    onChange={(e) => setEditedEndTime(e.target.value)}
+                                    className="border rounded px-2 py-1"
+                                  />
+                                </div>
+                              </>
+                            ) : (
+                              <>
+                                <span>DALLE ORE: {register.startTime}</span>
+                                <span>ALLE ORE: {register.endTime}</span>
+                              </>
+                            )}
                             <span>CLASSE: {register.class}</span>
+                            {!editingRegister && (
+                              <button
+                                onClick={() => handleEditStart(register)}
+                                className="ml-2 text-blue-600 hover:text-blue-800"
+                              >
+                                <Edit2 className="h-4 w-4" />
+                              </button>
+                            )}
                           </div>
                         </div>
                       </div>
@@ -208,7 +325,16 @@ export default function PrintRegistersModal({ isOpen, onClose }: PrintRegistersM
                         <div className="h-full flex flex-col">
                           <div className="p-3 border-b border-gray-300">
                             <div className="font-bold text-sm mb-2">Attività Svolta</div>
-                            <div className="text-sm min-h-[150px]">{register.activity?.description}</div>
+                            {editingRegister === register.id ? (
+                              <textarea
+                                value={editedActivity}
+                                onChange={(e) => setEditedActivity(e.target.value)}
+                                className="w-full h-32 p-2 border rounded text-sm"
+                                placeholder="Descrivi l'attività svolta..."
+                              />
+                            ) : (
+                              <div className="text-sm min-h-[150px]">{register.activity?.description}</div>
+                            )}
                           </div>
                           <div className="mt-auto p-3 border-t border-gray-300">
                             <div className="font-bold text-sm mb-2">FIRMA EDUCATORE/OPERATORE</div>
@@ -222,6 +348,25 @@ export default function PrintRegistersModal({ isOpen, onClose }: PrintRegistersM
                       </div>
                     </div>
                     <div className="mt-4 flex justify-end space-x-2">
+                      {editingRegister === register.id ? (
+                        <>
+                          <button
+                            onClick={() => handleSaveChanges(register.id)}
+                            className="inline-flex items-center px-3 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700"
+                          >
+                            <Save className="h-4 w-4 mr-2" />
+                            Salva Modifiche
+                          </button>
+                          <button
+                            onClick={handleCancelEdit}
+                            className="inline-flex items-center px-3 py-2 border border-transparent text-sm font-medium rounded-md text-gray-700 bg-gray-100 hover:bg-gray-200"
+                          >
+                            <X className="h-4 w-4 mr-2" />
+                            Annulla
+                          </button>
+                        </>
+                      ) : (
+                        <>
                       <button
                         onClick={() => handlePrintSingle(register)}
                         className="inline-flex items-center px-3 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700"
@@ -236,6 +381,8 @@ export default function PrintRegistersModal({ isOpen, onClose }: PrintRegistersM
                         <Printer className="h-4 w-4 mr-2" />
                         Stampa
                       </button>
+                        </>
+                      )}
                     </div>
                   </div>
                 ))}
