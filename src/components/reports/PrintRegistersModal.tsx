@@ -5,7 +5,7 @@ import { it } from 'date-fns/locale';
 import { FileText, Printer, X, Save, Edit2 } from 'lucide-react';
 import { useReactToPrint } from 'react-to-print';
 import html2pdf from 'html2pdf.js';
-import { collection, query, where, getDocs, doc, updateDoc } from 'firebase/firestore';
+import { collection, query, where, getDocs, doc, updateDoc, addDoc } from 'firebase/firestore';
 import { db } from '../../lib/firebase';
 import toast from 'react-hot-toast';
 
@@ -53,13 +53,26 @@ export default function PrintRegistersModal({ isOpen, onClose }: PrintRegistersM
   const fetchRegisters = async () => {
     setLoading(true);
     try {
-      // First get all verified lessons
       const lessonsQuery = query(collection(db, 'lessons'), where('attendanceVerified', '==', true));
       const lessonsSnapshot = await getDocs(lessonsQuery);
       const lessons = lessonsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
 
-      // For each lesson, get the attendance records
+      // For each lesson, get students and attendance records
       const registersWithData = await Promise.all(lessons.map(async (lesson) => {
+        // Get students for this class
+        const studentsQuery = query(
+          collection(db, 'students'),
+          where('school', '==', lesson.school),
+          where('class', '==', lesson.class)
+        );
+        const studentsSnapshot = await getDocs(studentsQuery);
+        const students = studentsSnapshot.docs.map(doc => ({
+          id: doc.id,
+          name: doc.data().name,
+          present: false
+        }));
+
+        // Get attendance records
         const attendanceQuery = query(
           collection(db, 'attendance'),
           where('date', '==', lesson.date),
@@ -67,10 +80,15 @@ export default function PrintRegistersModal({ isOpen, onClose }: PrintRegistersM
           where('class', '==', lesson.class)
         );
         const attendanceSnapshot = await getDocs(attendanceQuery);
-        const students = attendanceSnapshot.docs.map(doc => ({
-          id: doc.id,
-          ...doc.data()
-        }));
+        
+        // Update presence status for students
+        attendanceSnapshot.docs.forEach(doc => {
+          const data = doc.data();
+          const student = students.find(s => s.id === data.studentId);
+          if (student) {
+            student.present = data.present;
+          }
+        });
 
         // Get activity details
         const activityQuery = query(
@@ -80,7 +98,7 @@ export default function PrintRegistersModal({ isOpen, onClose }: PrintRegistersM
           where('class', '==', lesson.class)
         );
         const activitySnapshot = await getDocs(activityQuery);
-        const activity = activitySnapshot.docs[0]?.data() || null;
+        const activity = activitySnapshot.docs[0] ? { id: activitySnapshot.docs[0].id, ...activitySnapshot.docs[0].data() } : null;
 
         return {
           ...lesson,
@@ -88,6 +106,8 @@ export default function PrintRegistersModal({ isOpen, onClose }: PrintRegistersM
           activity
         };
       }));
+      
+      registersWithData.sort((a, b) => b.date.toDate() - a.date.toDate());
 
       setRegisters(registersWithData);
     } catch (error) {
@@ -109,16 +129,28 @@ export default function PrintRegistersModal({ isOpen, onClose }: PrintRegistersM
     try {
       await updateDoc(doc(db, 'lessons', registerId), {
         startTime: editedStartTime,
-        endTime: editedEndTime
+        endTime: editedEndTime,
+        lastModified: new Date()
       });
 
-      if (editedActivity) {
-        const register = registers.find(r => r.id === registerId);
-        const activityRef = doc(db, 'activities', register.activity.id);
-        await updateDoc(activityRef, {
+      const register = registers.find(r => r.id === registerId);
+      if (register?.activity?.id) {
+        await updateDoc(doc(db, 'activities', register.activity.id), {
           description: editedActivity,
           startTime: editedStartTime,
-          endTime: editedEndTime
+          endTime: editedEndTime,
+          lastModified: new Date()
+        });
+      } else if (editedActivity) {
+        // Create new activity if none exists
+        await addDoc(collection(db, 'activities'), {
+          description: editedActivity,
+          startTime: editedStartTime,
+          endTime: editedEndTime,
+          date: register.date,
+          school: register.school,
+          class: register.class,
+          created: new Date()
         });
       }
 
@@ -280,7 +312,7 @@ export default function PrintRegistersModal({ isOpen, onClose }: PrintRegistersM
                             <tr className="border-b border-gray-300">
                               <th className="w-8 p-1 text-center border-r border-gray-300 text-sm">#</th>
                               <th className="p-1 text-left border-r border-gray-300 text-sm">Studente</th>
-                              <th className="p-1 text-left text-sm">Presenza</th>
+                              <th className="p-1 text-center text-sm">Presenza</th>
                             </tr>
                           </thead>
                           <tbody>
@@ -288,7 +320,11 @@ export default function PrintRegistersModal({ isOpen, onClose }: PrintRegistersM
                               <tr key={student.id} className="border-b border-gray-300">
                                 <td className="p-1 text-center border-r border-gray-300 text-sm">{index + 1}</td>
                                 <td className="p-1 border-r border-gray-300 text-sm">{student.name}</td>
-                                <td className="p-1 text-sm">{student.present ? 'Presente' : 'Assente'}</td>
+                                <td className="p-1 text-sm text-center">
+                                  <span className={`px-2 py-1 rounded ${
+                                    student.present ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                                  }`}>{student.present ? 'Presente' : 'Assente'}</span>
+                                </td>
                               </tr>
                             ))}
                           </tbody>
