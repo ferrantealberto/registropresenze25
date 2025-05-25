@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { LogOut, School as SchoolIcon, Home, Trash2, Users, Download, Printer } from 'lucide-react';
+import { LogOut, School as SchoolIcon, Home, Trash2, Users, Download, Printer, FileSpreadsheet } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { collection, getDocs, deleteDoc, doc, query, orderBy } from 'firebase/firestore';
@@ -9,6 +9,7 @@ import * as XLSX from 'xlsx';
 import PrintRegistersModal from '../reports/PrintRegistersModal';
 
 import { format } from 'date-fns';
+import { it } from 'date-fns/locale';
 
 export default function Header() {
   const { logout } = useAuth();
@@ -112,6 +113,114 @@ export default function Header() {
     }
   };
 
+  const handleExportOrganizedData = async () => {
+    try {
+      // Fetch all collections
+      const collections = ['students', 'activities', 'attendance', 'lessons'];
+      const data: { [key: string]: any[] } = {};
+
+      for (const collectionName of collections) {
+        const querySnapshot = await getDocs(collection(db, collectionName));
+        data[collectionName] = querySnapshot.docs.map(doc => ({
+          id: doc.id,
+          ...doc.data()
+        }));
+      }
+
+      // Create workbook
+      const wb = XLSX.utils.book_new();
+
+      // Students sheet
+      const studentsData = data.students
+        .sort((a, b) => {
+          if (a.school === b.school) {
+            if (a.class === b.class) {
+              return a.name.localeCompare(b.name);
+            }
+            return a.class.localeCompare(b.class);
+          }
+          return a.school.localeCompare(b.school);
+        })
+        .map(student => ({
+          Scuola: student.school,
+          Classe: student.class,
+          'Nome Studente': student.name
+        }));
+
+      // Activities sheet
+      const activitiesData = data.activities
+        .sort((a, b) => a.date.toDate() - b.date.toDate())
+        .map(activity => ({
+          Data: format(activity.date.toDate(), 'dd/MM/yyyy', { locale: it }),
+          Scuola: activity.school,
+          Classe: activity.class,
+          'Ora Inizio': activity.startTime,
+          'Ora Fine': activity.endTime,
+          'Ore Totali': activity.hours,
+          Descrizione: activity.description
+        }));
+
+      // Attendance sheet
+      const attendanceData = data.attendance
+        .sort((a, b) => a.date.toDate() - b.date.toDate())
+        .map(record => ({
+          Data: format(record.date.toDate(), 'dd/MM/yyyy', { locale: it }),
+          'ID Studente': record.studentId,
+          Presente: record.present ? 'Sì' : 'No',
+          Note: record.notes || '',
+          Verificato: record.attendanceVerified ? 'Sì' : 'No',
+          'Verificato da': record.verifiedBy || '',
+          'Data Verifica': record.verifiedAt ? format(record.verifiedAt.toDate(), 'dd/MM/yyyy HH:mm', { locale: it }) : ''
+        }));
+
+      // Lessons sheet
+      const lessonsData = data.lessons
+        .sort((a, b) => a.date.toDate() - b.date.toDate())
+        .map(lesson => ({
+          Data: format(lesson.date.toDate(), 'dd/MM/yyyy', { locale: it }),
+          Scuola: lesson.school,
+          Classe: lesson.class,
+          'Ora Inizio': lesson.startTime,
+          'Ora Fine': lesson.endTime,
+          'Ore': lesson.hours,
+          'Presenze Verificate': lesson.attendanceVerified ? 'Sì' : 'No'
+        }));
+
+      // Add sheets to workbook
+      const sheets = [
+        { name: 'Studenti', data: studentsData },
+        { name: 'Attività', data: activitiesData },
+        { name: 'Presenze', data: attendanceData },
+        { name: 'Lezioni', data: lessonsData }
+      ];
+
+      sheets.forEach(sheet => {
+        const ws = XLSX.utils.json_to_sheet(sheet.data);
+        XLSX.utils.book_append_sheet(wb, ws, sheet.name);
+
+        // Auto-size columns
+        const range = XLSX.utils.decode_range(ws['!ref'] || 'A1');
+        const cols = [];
+        for (let C = range.s.c; C <= range.e.c; ++C) {
+          let maxLen = 0;
+          for (let R = range.s.r; R <= range.e.r; ++R) {
+            const cell = ws[XLSX.utils.encode_cell({r: R, c: C})];
+            if (cell?.v) maxLen = Math.max(maxLen, String(cell.v).length);
+          }
+          cols[C] = { wch: maxLen + 2 };
+        }
+        ws['!cols'] = cols;
+      });
+
+      // Save file
+      XLSX.writeFile(wb, `registro-presenze-${format(new Date(), 'dd-MM-yyyy')}.xlsx`);
+      toast.success('Database esportato con successo');
+    } catch (error) {
+      console.error('Error exporting database:', error);
+      toast.error('Errore durante l\'esportazione del database');
+    }
+  };
+
   return (
     <nav className="bg-white shadow-lg">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -149,6 +258,13 @@ export default function Header() {
             >
               <Download className="h-4 w-4 mr-2" />
               Esporta Database
+            </button>
+            <button
+              onClick={handleExportOrganizedData}
+              className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
+            >
+              <FileSpreadsheet className="h-4 w-4 mr-2" />
+              Esporta Excel Organizzato
             </button>
             <button
               onClick={handleDeleteAllData}
