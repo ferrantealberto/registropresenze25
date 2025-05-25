@@ -68,32 +68,32 @@ export default function PrintRegistersModal({ isOpen, onClose }: PrintRegistersM
         const studentsSnapshot = await getDocs(studentsQuery);
         const students = studentsSnapshot.docs.map(doc => ({
           id: doc.id,
-          name: doc.data().name,
-          present: false
+          ...doc.data(),
+          present: true // Default to present
         }));
 
         // Get attendance records
         const attendanceQuery = query(
           collection(db, 'attendance'),
-          where('date', '==', new Date(lesson.date.toDate().toDateString())),
-          where('school', '==', lesson.school),
-          where('class', '==', lesson.class)
+          where('date', '==', lesson.date)
         );
         const attendanceSnapshot = await getDocs(attendanceQuery);
         
         // Update presence status for students
         attendanceSnapshot.docs.forEach(doc => {
           const data = doc.data();
-          const student = students.find(s => s.id === data.studentId);
-          if (student) {
-            student.present = data.present;
+          if (data.studentId) {
+            const student = students.find(s => s.id === data.studentId);
+            if (student) {
+              student.present = data.present ?? true;
+            }
           }
         });
 
         // Get activity details
         const activityQuery = query(
           collection(db, 'activities'),
-          where('date', '==', new Date(lesson.date.toDate().toDateString())),
+          where('date', '==', lesson.date),
           where('school', '==', lesson.school),
           where('class', '==', lesson.class)
         );
@@ -321,7 +321,7 @@ export default function PrintRegistersModal({ isOpen, onClose }: PrintRegistersM
                                 <td className="p-1 text-center border-r border-gray-300 text-sm">{index + 1}</td>
                                 <td className="p-1 border-r border-gray-300 text-sm">{student.name}</td>
                                 <td className="p-1 text-sm text-left">
-                                  <span className={`px-2 py-1 rounded ${
+                                  <span className={`inline-block px-2 py-1 rounded ${
                                     student.present ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
                                   }`}>{student.present ? 'Presente' : 'Assente'}</span>
                                 </td>
