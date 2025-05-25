@@ -56,7 +56,7 @@ export default function PrintRegistersModal({ isOpen, onClose }: PrintRegistersM
       const lessonsQuery = query(collection(db, 'lessons'), where('attendanceVerified', '==', true));
       const lessonsSnapshot = await getDocs(lessonsQuery);
       const lessons = lessonsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-
+      
       // For each lesson, get students and attendance records
       const registersWithData = await Promise.all(lessons.map(async (lesson) => {
         // Get students for this class
@@ -75,7 +75,7 @@ export default function PrintRegistersModal({ isOpen, onClose }: PrintRegistersM
         // Get attendance records
         const attendanceQuery = query(
           collection(db, 'attendance'),
-          where('date', '==', lesson.date),
+          where('date', '==', new Date(lesson.date.toDate().toDateString())),
           where('school', '==', lesson.school),
           where('class', '==', lesson.class)
         );
@@ -93,7 +93,7 @@ export default function PrintRegistersModal({ isOpen, onClose }: PrintRegistersM
         // Get activity details
         const activityQuery = query(
           collection(db, 'activities'),
-          where('date', '==', lesson.date),
+          where('date', '==', new Date(lesson.date.toDate().toDateString())),
           where('school', '==', lesson.school),
           where('class', '==', lesson.class)
         );
@@ -245,7 +245,7 @@ export default function PrintRegistersModal({ isOpen, onClose }: PrintRegistersM
                   <div
                     key={register.id}
                     id={`register-${register.id}`}
-                    className="bg-white p-6"
+                    className="bg-white p-6 mb-16 page-break-after-always"
                     style={{ width: '297mm', height: '210mm' }}
                   >
                     <div className="border-b border-gray-300 p-3">
@@ -312,7 +312,7 @@ export default function PrintRegistersModal({ isOpen, onClose }: PrintRegistersM
                             <tr className="border-b border-gray-300">
                               <th className="w-8 p-1 text-center border-r border-gray-300 text-sm">#</th>
                               <th className="p-1 text-left border-r border-gray-300 text-sm">Studente</th>
-                              <th className="p-1 text-center text-sm">Presenza</th>
+                              <th className="p-1 text-left text-sm">Presenza</th>
                             </tr>
                           </thead>
                           <tbody>
@@ -320,7 +320,7 @@ export default function PrintRegistersModal({ isOpen, onClose }: PrintRegistersM
                               <tr key={student.id} className="border-b border-gray-300">
                                 <td className="p-1 text-center border-r border-gray-300 text-sm">{index + 1}</td>
                                 <td className="p-1 border-r border-gray-300 text-sm">{student.name}</td>
-                                <td className="p-1 text-sm text-center">
+                                <td className="p-1 text-sm text-left">
                                   <span className={`px-2 py-1 rounded ${
                                     student.present ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
                                   }`}>{student.present ? 'Presente' : 'Assente'}</span>
