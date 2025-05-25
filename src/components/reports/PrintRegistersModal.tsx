@@ -137,33 +137,6 @@ export default function PrintRegistersModal({ isOpen, onClose }: PrintRegistersM
     setEditedEndTime('');
     setEditedActivity('');
   };
-      const querySnapshot = await getDocs(q);
-      const fetchedRegisters = querySnapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data()
-      }));
-      
-      // Sort by date, school, and class
-      fetchedRegisters.sort((a, b) => {
-        const dateA = a.date.toDate();
-        const dateB = b.date.toDate();
-        if (dateA.getTime() !== dateB.getTime()) {
-          return dateA.getTime() - dateB.getTime();
-        }
-        if (a.school !== b.school) {
-          return a.school.localeCompare(b.school);
-        }
-        return a.class.localeCompare(b.class);
-      });
-
-      setRegisters(fetchedRegisters);
-    } catch (error) {
-      console.error('Error fetching registers:', error);
-      toast.error('Errore nel recupero dei registri');
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const handlePrint = useReactToPrint({
     content: () => reportRef.current,
@@ -367,20 +340,20 @@ export default function PrintRegistersModal({ isOpen, onClose }: PrintRegistersM
                         </>
                       ) : (
                         <>
-                      <button
-                        onClick={() => handlePrintSingle(register)}
-                        className="inline-flex items-center px-3 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700"
-                      >
-                        <FileText className="h-4 w-4 mr-2" />
-                        Salva PDF
-                      </button>
-                      <button
-                        onClick={handlePrint}
-                        className="inline-flex items-center px-3 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700"
-                      >
-                        <Printer className="h-4 w-4 mr-2" />
-                        Stampa
-                      </button>
+                          <button
+                            onClick={() => handlePrintSingle(register)}
+                            className="inline-flex items-center px-3 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700"
+                          >
+                            <FileText className="h-4 w-4 mr-2" />
+                            Salva PDF
+                          </button>
+                          <button
+                            onClick={handlePrint}
+                            className="inline-flex items-center px-3 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700"
+                          >
+                            <Printer className="h-4 w-4 mr-2" />
+                            Stampa
+                          </button>
                         </>
                       )}
                     </div>
