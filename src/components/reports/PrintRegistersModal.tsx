@@ -90,7 +90,6 @@ export default function PrintRegistersModal({ isOpen, onClose }: PrintRegistersM
     if (!element) return;
     
     // Configure PDF options for A4 landscape
-
     const opt = {
       margin: [15, 10, 15, 10], // top, right, bottom, left margins in mm
       filename: `registro-${register.school}-${register.class}-${format(register.date.toDate(), 'dd-MM-yyyy')}.pdf`,
