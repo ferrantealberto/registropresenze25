@@ -33,7 +33,7 @@ const AttendanceReport = forwardRef<HTMLDivElement, AttendanceReportProps>(
           <div className="flex items-start justify-between">
             <div className="flex items-center">
               <img 
-                src="http://weblabfactory.it/logoregistroscuola.png" 
+                src="/logo.png" 
                 alt="Logo" 
                 style={{ width: '100px', height: 'auto' }}
               />
@@ -87,16 +87,16 @@ const AttendanceReport = forwardRef<HTMLDivElement, AttendanceReportProps>(
           {/* Right Side - Activity and Signature */}
           <div style={{ width: '33%' }}>
             <div className="h-full flex flex-col">
-              <div className="p-2 border-b border-gray-300" style={{ minHeight: '300px', maxHeight: '80%' }}>
+              <div className="p-2 border-b border-gray-300" style={{ minHeight: '400px', maxHeight: '85%' }}>
                 <div className="font-bold text-xs mb-2">Attività Svolta</div>
                 <div className="text-xs">{activity?.description}</div>
               </div>
-              <div className="p-2 mt-auto">
+              <div className="p-2 mt-2">
                 <div className="font-bold text-xs mb-2">FIRMA EDUCATORE/OPERATORE</div>
                 <img 
                   src="/signature.png" 
                   alt="Firma" 
-                  style={{ width: '150px', height: 'auto', objectFit: 'contain' }}
+                  style={{ width: '120px', height: 'auto', objectFit: 'contain' }}
                 />
               </div>
             </div>
