@@ -27,19 +27,19 @@ interface AttendanceReportProps {
 const AttendanceReport = forwardRef<HTMLDivElement, AttendanceReportProps>(
   ({ students, attendanceMap, notesMap, school, className, date, activity }, ref) => {
     return (
-      <div ref={ref} className="bg-white" style={{ width: '297mm', height: '210mm', margin: '0 auto' }}>
+      <div ref={ref} className="bg-white register-page">
         {/* Header */}
-        <div className="border-b border-gray-300 p-3">
+        <div className="border-b border-gray-300 p-2">
           <div className="flex items-start justify-between">
             <div className="flex items-center">
               <img 
                 src="http://weblabfactory.it/logoregistroscuola.png" 
                 alt="Logo" 
-                className="w-32 h-auto"
+                className="w-24 h-auto print:w-20"
               />
             </div>
             <div className="flex flex-col">
-              <div className="flex items-center gap-4 text-sm font-semibold">
+              <div className="flex items-center gap-2 text-sm font-semibold">
                 <span>REGISTRO GIORNALIERO - data: {format(new Date(date), 'dd/MM/yyyy', { locale: it })}</span>
                 <span>DALLE ORE: {activity?.startTime}</span>
                 <span>ALLE ORE: {activity?.endTime}</span>
@@ -57,23 +57,27 @@ const AttendanceReport = forwardRef<HTMLDivElement, AttendanceReportProps>(
         </div>
 
         {/* Main Content */}
-        <div className="flex h-[calc(210mm-12rem)]">
+        <div className="flex flex-1" style={{ height: 'calc(100% - 180px)' }}>
           {/* Left Side - Student List */}
           <div className="flex-grow border-r border-gray-300">
             <table className="w-full">
               <thead>
                 <tr className="border-b border-gray-300">
-                  <th className="w-8 p-1 text-center border-r border-gray-300 text-sm">#</th>
-                  <th className="p-1 text-left border-r border-gray-300 text-sm">Studente</th>
-                  <th className="p-1 text-left text-sm">Presenza</th>
+                  <th className="w-8 p-1 text-center border-r border-gray-300 text-xs">#</th>
+                  <th className="p-1 text-left border-r border-gray-300 text-xs">Studente</th>
+                  <th className="p-1 text-left text-xs">Presenza</th>
                 </tr>
               </thead>
               <tbody>
                 {students.map((student, index) => (
                   <tr key={student.id} className="border-b border-gray-300">
-                    <td className="p-1 text-center border-r border-gray-300 text-sm">{index + 1}</td>
-                    <td className="p-1 border-r border-gray-300 text-sm">{student.name}</td>
-                    <td className="p-1 text-sm">{attendanceMap[student.id] ? 'Presente' : 'Assente'}</td>
+                    <td className="p-1 text-center border-r border-gray-300 text-xs">{index + 1}</td>
+                    <td className="p-1 border-r border-gray-300 text-xs">{student.name}</td>
+                    <td className="p-1 text-xs text-left">
+                      <span className={`inline-block px-2 py-1 rounded ${
+                        attendanceMap[student.id] ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                      }`}>{attendanceMap[student.id] ? 'Presente' : 'Assente'}</span>
+                    </td>
                   </tr>
                 ))}
               </tbody>
@@ -92,7 +96,7 @@ const AttendanceReport = forwardRef<HTMLDivElement, AttendanceReportProps>(
                 <img 
                   src="http://weblabfactory.it/lamiafirmapers24.png" 
                   alt="Firma" 
-                  className="w-32 h-auto"
+                  className="w-32 h-auto print:w-28"
                 />
               </div>
             </div>
