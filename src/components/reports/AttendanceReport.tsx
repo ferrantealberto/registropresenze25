@@ -87,16 +87,16 @@ const AttendanceReport = forwardRef<HTMLDivElement, AttendanceReportProps>(
           {/* Right Side - Activity and Signature */}
           <div style={{ width: '33%' }}>
             <div className="h-full flex flex-col">
-              <div className="p-2 border-b border-gray-300" style={{ minHeight: '120px', maxHeight: '50%' }}>
+              <div className="p-2 border-b border-gray-300" style={{ minHeight: '100px', maxHeight: '40%' }}>
                 <div className="font-bold text-xs mb-1">Attività Svolta</div>
                 <div className="text-xs">{activity?.description}</div>
               </div>
-              <div className="p-2 mt-auto">
+              <div className="p-2 mt-4">
                 <div className="font-bold text-xs mb-1">FIRMA EDUCATORE/OPERATORE</div>
                 <img 
                   src="http://weblabfactory.it/lamiafirmapers24.png" 
                   alt="Firma" 
-                  style={{ width: '120px', height: 'auto', maxHeight: '40px', objectFit: 'contain' }}
+                  style={{ width: '150px', height: '50px', objectFit: 'contain' }}
                 />
               </div>
             </div>
