@@ -29,17 +29,17 @@ const AttendanceReport = forwardRef<HTMLDivElement, AttendanceReportProps>(
     return (
       <div ref={ref} className="bg-white" style={{ width: '297mm', height: '210mm', padding: '10mm', margin: 0 }}>
         {/* Header */}
-        <div className="border-b border-gray-300 pb-0.5">
+        <div className="border-b border-gray-300 pb-1">
           <div className="flex items-start justify-between">
             <div className="flex items-center">
               <img 
                 src="http://weblabfactory.it/logoregistroscuola.png" 
                 alt="Logo" 
-                style={{ width: '80px', height: 'auto' }}
+                style={{ width: '100px', height: 'auto' }}
               />
             </div>
             <div className="flex flex-col">
-              <div className="flex items-center gap-2 text-[10px] font-semibold">
+              <div className="flex items-center gap-3 text-xs font-semibold uppercase">
                 <span>REGISTRO GIORNALIERO - data: {format(new Date(date), 'dd/MM/yyyy', { locale: it })}</span>
                 <span>DALLE ORE: {activity?.startTime}</span>
                 <span>ALLE ORE: {activity?.endTime}</span>
@@ -49,10 +49,10 @@ const AttendanceReport = forwardRef<HTMLDivElement, AttendanceReportProps>(
           </div>
 
           {/* Project Title */}
-          <div className="mt-1 border-t border-gray-200 pt-1">
-            <div className="text-[9px]">Titolo prog.: <strong>S.E.M.E. 4.0 - Strategie Educative per Menti in Evoluzione</strong></div>
-            <div className="text-[9px]">Co. Prog.: 2022-STE-01208 - codice attività: 56144-338961</div>
-            <div className="text-[9px]">Attività: Laboratori di apprendimento collaborativo curriculari Agricoltura 4.0</div>
+          <div className="mt-2 border-t border-gray-200 pt-2">
+            <div className="text-[11px]">Titolo prog.: <strong>S.E.M.E. 4.0 - Strategie Educative per Menti in Evoluzione</strong></div>
+            <div className="text-[11px]">Co. Prog.: 2022-STE-01208 - codice attività: 56144-338961</div>
+            <div className="text-[11px]">Attività: Laboratori di apprendimento collaborativo curriculari Agricoltura 4.0</div>
           </div>
         </div>
 
@@ -87,16 +87,16 @@ const AttendanceReport = forwardRef<HTMLDivElement, AttendanceReportProps>(
           {/* Right Side - Activity and Signature */}
           <div style={{ width: '33%' }}>
             <div className="h-full flex flex-col">
-              <div className="p-2 border-b border-gray-300" style={{ minHeight: '120px', maxHeight: '75%' }}>
-                <div className="font-bold text-[10px] mb-1">Attività Svolta</div>
-                <div className="text-[10px]">{activity?.description}</div>
+              <div className="p-2 border-b border-gray-300" style={{ minHeight: '150px', maxHeight: '70%' }}>
+                <div className="font-bold text-xs mb-2">Attività Svolta</div>
+                <div className="text-xs">{activity?.description}</div>
               </div>
-              <div className="p-2 mt-4">
-                <div className="font-bold text-[10px] mb-1">FIRMA EDUCATORE/OPERATORE</div>
+              <div className="p-2 mt-2">
+                <div className="font-bold text-xs mb-2">FIRMA EDUCATORE/OPERATORE</div>
                 <img 
-                  src="/signature.png" 
+                  src="http://weblabfactory.it/lamiafirmapers24.png" 
                   alt="Firma" 
-                  style={{ width: '150px', height: '50px', objectFit: 'contain' }}
+                  style={{ width: '200px', height: '60px', objectFit: 'contain' }}
                 />
               </div>
             </div>
