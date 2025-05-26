@@ -2,7 +2,7 @@ import { useState, useRef, useEffect } from 'react';
 import Modal from 'react-modal';
 import { format } from 'date-fns';
 import { it } from 'date-fns/locale';
-import { FileText, Printer, X, Save, Edit2 } from 'lucide-react';
+import { FileText, Printer, X, Save, Edit2, Check } from 'lucide-react';
 import { useReactToPrint } from 'react-to-print';
 import html2pdf from 'html2pdf.js';
 import { collection, query, where, getDocs, doc, updateDoc, addDoc } from 'firebase/firestore';
@@ -48,6 +48,7 @@ export default function PrintRegistersModal({ isOpen, onClose }: PrintRegistersM
   const [editedActivity, setEditedActivity] = useState('');
   const [editedStartTime, setEditedStartTime] = useState('');
   const [editedEndTime, setEditedEndTime] = useState('');
+  const [printedRegisters, setPrintedRegisters] = useState<Record<string, boolean>>({});
   const reportRef = useRef<HTMLDivElement>(null);
 
   const fetchRegisters = async () => {
@@ -189,7 +190,10 @@ export default function PrintRegistersModal({ isOpen, onClose }: PrintRegistersM
   const handlePrintSingle = async (register: any) => {
     const element = document.getElementById(`register-${register.id}`);
     if (!element) return;
-    
+
+    // Add print class to body
+    document.body.classList.add('printing');
+
     const opt = {
       margin: 10,
       filename: `registro-${register.school}-${register.class}-${format(register.date.toDate(), 'dd-MM-yyyy')}.pdf`,
@@ -197,25 +201,25 @@ export default function PrintRegistersModal({ isOpen, onClose }: PrintRegistersM
       html2canvas: { 
         scale: 2,
         useCORS: true,
-        logging: false,
-        allowTaint: true
+        windowWidth: 1200,
+        windowHeight: 850
       },
       jsPDF: { 
         unit: 'mm',
         format: 'a4',
         orientation: 'landscape',
-        compress: true,
-        hotfixes: ['px_scaling']
+        compress: true
       }
     };
 
     try {
-      const pdf = html2pdf().set(opt);
-      await pdf.from(element).save();
+      await html2pdf().set(opt).from(element).save();
       toast.success('PDF generato con successo');
     } catch (error) {
       console.error('Error generating PDF:', error);
       toast.error('Errore nella generazione del PDF');
+    } finally {
+      document.body.classList.remove('printing');
     }
   };
 
@@ -401,6 +405,23 @@ export default function PrintRegistersModal({ isOpen, onClose }: PrintRegistersM
                         </>
                       ) : (
                         <>
+                          <div className="flex items-center mr-4">
+                            <label className="inline-flex items-center cursor-pointer">
+                              <input
+                                type="checkbox"
+                                checked={printedRegisters[register.id] || false}
+                                onChange={(e) => setPrintedRegisters(prev => ({
+                                  ...prev,
+                                  [register.id]: e.target.checked
+                                }))}
+                                className="sr-only peer"
+                              />
+                              <div className="relative w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                              <span className="ms-3 text-sm font-medium text-gray-700">
+                                {printedRegisters[register.id] ? 'Stampato' : 'Non Stampato'}
+                              </span>
+                            </label>
+                          </div>
                           <button
                             onClick={() => handlePrintSingle(register)}
                             className="inline-flex items-center px-3 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 print:hidden z-10"

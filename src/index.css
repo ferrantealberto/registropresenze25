@@ -2,9 +2,19 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Print styles */
 @page {
   size: A4 landscape;
   margin: 10mm;
+}
+
+.register-page {
+  width: 297mm;
+  height: 210mm;
+  margin: 0;
+  padding: 10mm;
+  page-break-after: always;
+  page-break-inside: avoid;
 }
 
 .printing * {
@@ -30,18 +40,6 @@
   
   .print\:hidden {
     display: none !important;
-  }
-  
-  .page {
-    width: 100%;
-    height: 100%;
-    margin: 0;
-    padding: 0;
-  }
-  
-  .page {
-    page-break-after: always;
-    page-break-inside: avoid;
   }
   
   .page-break-after-always {
