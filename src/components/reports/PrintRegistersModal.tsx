@@ -281,7 +281,7 @@ export default function PrintRegistersModal({ isOpen, onClose }: PrintRegistersM
                       <div className="flex items-start justify-between">
                         <div className="flex items-center">
                           <img 
-                            src="http://weblabfactory.it/logoregistroscuola.png" 
+                            src="/logo.png" 
                             alt="Logo" 
                             className="w-24 h-auto print:w-20"
                           />
@@ -377,7 +377,7 @@ export default function PrintRegistersModal({ isOpen, onClose }: PrintRegistersM
                           <div className="mt-auto p-3 border-t border-gray-300">
                             <div className="font-bold text-sm mb-2">FIRMA EDUCATORE/OPERATORE</div>
                             <img 
-                              src="http://weblabfactory.it/lamiafirmapers24.png" 
+                              src="/signature.png" 
                               alt="Firma" 
                               className="w-32 h-auto"
                             />
