@@ -172,28 +172,47 @@ export default function PrintRegistersModal({ isOpen, onClose }: PrintRegistersM
 
   const handlePrint = useReactToPrint({
     content: () => reportRef.current,
+    pageStyle: `
+      @page {
+        size: landscape;
+        margin: 10mm;
+      }
+    `,
+    onBeforeGetContent: () => {
+      document.body.classList.add('printing');
+    },
+    onAfterPrint: () => {
+      document.body.classList.remove('printing');
+    }
   });
 
   const handlePrintSingle = async (register: any) => {
     const element = document.getElementById(`register-${register.id}`);
     if (!element) return;
     
-    // Configure PDF options for A4 landscape
     const opt = {
-      margin: [15, 10, 15, 10], // top, right, bottom, left margins in mm
+      margin: 10,
       filename: `registro-${register.school}-${register.class}-${format(register.date.toDate(), 'dd-MM-yyyy')}.pdf`,
       image: { type: 'jpeg', quality: 0.98 },
-      html2canvas: { scale: 2 },
+      html2canvas: { 
+        scale: 2,
+        useCORS: true,
+        logging: false,
+        allowTaint: true
+      },
       jsPDF: { 
         unit: 'mm',
         format: 'a4',
         orientation: 'landscape',
-        compress: true
+        compress: true,
+        hotfixes: ['px_scaling']
       }
     };
 
     try {
-      await html2pdf().set(opt).from(element).save();
+      const pdf = html2pdf().set(opt);
+      await pdf.from(element).save();
+      toast.success('PDF generato con successo');
     } catch (error) {
       console.error('Error generating PDF:', error);
       toast.error('Errore nella generazione del PDF');

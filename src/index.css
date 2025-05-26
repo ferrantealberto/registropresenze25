@@ -2,22 +2,50 @@
 @tailwind components;
 @tailwind utilities;
 
+.printing * {
+  -webkit-print-color-adjust: exact !important;
+  print-color-adjust: exact !important;
+}
+
 @media print {
   @page {
     size: A4 landscape;
     margin: 10mm;
   }
   
+  html, body {
+    height: 100%;
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow: hidden;
+  }
+  
   body {
-    margin: 0;
-    padding: 0;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
   }
   
   .print\:hidden {
     display: none !important;
   }
   
+  .page {
+    page-break-after: always;
+    page-break-inside: avoid;
+  }
+  
   .page-break-after-always {
     page-break-after: always;
+    page-break-inside: avoid;
+  }
+  
+  button {
+    display: none !important;
+  }
+  
+  img {
+    display: block !important;
+    max-width: 100% !important;
+    height: auto !important;
   }
 }
