@@ -264,26 +264,26 @@ export default function PrintRegistersModal({ isOpen, onClose }: PrintRegistersM
                   <div
                     key={register.id}
                     id={`register-${register.id}`}
-                    className="bg-white p-6 mb-32 page-break-after-always print:mb-0 print:p-4 relative"
+                    className="bg-white p-6 mb-32 page-break-after-always print:mb-0 print:p-2 relative"
                     style={{ 
-                      width: '297mm', 
-                      minHeight: '210mm',
+                      width: '100%',
+                      height: '100%',
                       marginBottom: '4rem',
                       pageBreakAfter: 'always',
                       pageBreakInside: 'avoid'
                     }}
                   >
-                    <div className="border-b border-gray-300 p-3">
+                    <div className="border-b border-gray-300 p-2">
                       <div className="flex items-start justify-between">
                         <div className="flex items-center">
                           <img 
                             src="http://weblabfactory.it/logoregistroscuola.png" 
                             alt="Logo" 
-                            className="w-32 h-auto"
+                            className="w-24 h-auto print:w-20"
                           />
                         </div>
                         <div className="flex flex-col">
-                          <div className="flex items-center gap-4 text-sm font-semibold">
+                          <div className="flex items-center gap-2 text-sm font-semibold">
                             <span>REGISTRO GIORNALIERO - data: {format(register.date.toDate(), 'dd/MM/yyyy', { locale: it })}</span>
                             {editingRegister === register.id ? (
                               <>
@@ -330,22 +330,22 @@ export default function PrintRegistersModal({ isOpen, onClose }: PrintRegistersM
                         <div className="text-[11px]">Attività: Laboratori di apprendimento collaborativo curriculari Agricoltura 4.0</div>
                       </div>
                     </div>
-                    <div className="flex h-[calc(210mm-12rem)]">
+                    <div className="flex flex-1" style={{ height: 'calc(100% - 180px)' }}>
                       <div className="flex-grow border-r border-gray-300">
                         <table className="w-full">
                           <thead>
                             <tr className="border-b border-gray-300">
-                              <th className="w-8 p-1 text-center border-r border-gray-300 text-sm">#</th>
-                              <th className="p-1 text-left border-r border-gray-300 text-sm">Studente</th>
-                              <th className="p-1 text-left text-sm">Presenza</th>
+                              <th className="w-8 p-1 text-center border-r border-gray-300 text-xs">#</th>
+                              <th className="p-1 text-left border-r border-gray-300 text-xs">Studente</th>
+                              <th className="p-1 text-left text-xs">Presenza</th>
                             </tr>
                           </thead>
                           <tbody>
                             {register.students?.map((student: any, index: number) => (
                               <tr key={student.id} className="border-b border-gray-300">
-                                <td className="p-1 text-center border-r border-gray-300 text-sm">{index + 1}</td>
-                                <td className="p-1 border-r border-gray-300 text-sm">{student.name}</td>
-                                <td className="p-1 text-sm text-left">
+                                <td className="p-1 text-center border-r border-gray-300 text-xs">{index + 1}</td>
+                                <td className="p-1 border-r border-gray-300 text-xs">{student.name}</td>
+                                <td className="p-1 text-xs text-left">
                                   <span className={`inline-block px-2 py-1 rounded ${
                                     student.present ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
                                   }`}>{student.present ? 'Presente' : 'Assente'}</span>

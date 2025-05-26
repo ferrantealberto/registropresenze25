@@ -2,31 +2,41 @@
 @tailwind components;
 @tailwind utilities;
 
+@page {
+  size: A4 landscape;
+  margin: 10mm;
+}
+
 .printing * {
   -webkit-print-color-adjust: exact !important;
   print-color-adjust: exact !important;
 }
 
 @media print {
-  @page {
-    size: A4 landscape;
-    margin: 10mm;
-  }
-  
   html, body {
     height: 100%;
     margin: 0 !important;
     padding: 0 !important;
     overflow: hidden;
+    background: white;
   }
   
   body {
     -webkit-print-color-adjust: exact !important;
     print-color-adjust: exact !important;
+    width: 297mm;
+    height: 210mm;
   }
   
   .print\:hidden {
     display: none !important;
+  }
+  
+  .page {
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    padding: 0;
   }
   
   .page {
@@ -39,13 +49,23 @@
     page-break-inside: avoid;
   }
   
+  table {
+    page-break-inside: auto;
+  }
+  
+  tr {
+    page-break-inside: avoid;
+    page-break-after: auto;
+  }
+  
   button {
     display: none !important;
   }
   
   img {
     display: block !important;
-    max-width: 100% !important;
+    width: auto !important;
     height: auto !important;
+    max-height: 100% !important;
   }
 }
