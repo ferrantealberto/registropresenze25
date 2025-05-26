@@ -245,8 +245,14 @@ export default function PrintRegistersModal({ isOpen, onClose }: PrintRegistersM
                   <div
                     key={register.id}
                     id={`register-${register.id}`}
-                    className="bg-white p-6 mb-32 page-break-after-always print:mb-0 print:p-4"
-                    style={{ width: '297mm', minHeight: '210mm' }}
+                    className="bg-white p-6 mb-32 page-break-after-always print:mb-0 print:p-4 relative"
+                    style={{ 
+                      width: '297mm', 
+                      minHeight: '210mm',
+                      marginBottom: '4rem',
+                      pageBreakAfter: 'always',
+                      pageBreakInside: 'avoid'
+                    }}
                   >
                     <div className="border-b border-gray-300 p-3">
                       <div className="flex items-start justify-between">
@@ -361,14 +367,14 @@ export default function PrintRegistersModal({ isOpen, onClose }: PrintRegistersM
                         <>
                           <button
                             onClick={() => handleSaveChanges(register.id)}
-                            className="inline-flex items-center px-3 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700"
+                            className="inline-flex items-center px-3 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700 print:hidden"
                           >
                             <Save className="h-4 w-4 mr-2" />
                             Salva Modifiche
                           </button>
                           <button
                             onClick={handleCancelEdit}
-                            className="inline-flex items-center px-3 py-2 border border-transparent text-sm font-medium rounded-md text-gray-700 bg-gray-100 hover:bg-gray-200"
+                            className="inline-flex items-center px-3 py-2 border border-transparent text-sm font-medium rounded-md text-gray-700 bg-gray-100 hover:bg-gray-200 print:hidden"
                           >
                             <X className="h-4 w-4 mr-2" />
                             Annulla
@@ -378,16 +384,14 @@ export default function PrintRegistersModal({ isOpen, onClose }: PrintRegistersM
                         <>
                           <button
                             onClick={() => handlePrintSingle(register)}
-                            className="inline-flex items-center px-3 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 print:hidden"
-                            style={{ pageBreakInside: 'avoid' }}
+                            className="inline-flex items-center px-3 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 print:hidden z-10"
                           >
                             <FileText className="h-4 w-4 mr-2" />
                             Salva PDF
                           </button>
                           <button
                             onClick={handlePrint}
-                            className="inline-flex items-center px-3 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700 print:hidden"
-                            style={{ pageBreakInside: 'avoid' }}
+                            className="inline-flex items-center px-3 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700 print:hidden z-10"
                           >
                             <Printer className="h-4 w-4 mr-2" />
                             Stampa
