@@ -29,17 +29,17 @@ const AttendanceReport = forwardRef<HTMLDivElement, AttendanceReportProps>(
     return (
       <div ref={ref} className="bg-white" style={{ width: '297mm', height: '210mm', padding: '10mm', margin: 0 }}>
         {/* Header */}
-        <div className="border-b border-gray-300 pb-2">
+        <div className="border-b border-gray-300 pb-1">
           <div className="flex items-start justify-between">
             <div className="flex items-center">
               <img 
                 src="http://weblabfactory.it/logoregistroscuola.png" 
                 alt="Logo" 
-                style={{ width: '120px', height: 'auto' }}
+                style={{ width: '100px', height: 'auto' }}
               />
             </div>
             <div className="flex flex-col">
-              <div className="flex items-center gap-4 text-sm font-semibold">
+              <div className="flex items-center gap-3 text-xs font-semibold">
                 <span>REGISTRO GIORNALIERO - data: {format(new Date(date), 'dd/MM/yyyy', { locale: it })}</span>
                 <span>DALLE ORE: {activity?.startTime}</span>
                 <span>ALLE ORE: {activity?.endTime}</span>
@@ -49,32 +49,32 @@ const AttendanceReport = forwardRef<HTMLDivElement, AttendanceReportProps>(
           </div>
 
           {/* Project Title */}
-          <div className="mt-2 border-t border-gray-200 pt-2">
-            <div className="text-[11px]">Titolo prog.: <strong>S.E.M.E. 4.0 - Strategie Educative per Menti in Evoluzione</strong></div>
-            <div className="text-[11px]">Co. Prog.: 2022-STE-01208 - codice attività: 56144-338961</div>
-            <div className="text-[11px]">Attività: Laboratori di apprendimento collaborativo curriculari Agricoltura 4.0</div>
+          <div className="mt-1 border-t border-gray-200 pt-1">
+            <div className="text-[10px]">Titolo prog.: <strong>S.E.M.E. 4.0 - Strategie Educative per Menti in Evoluzione</strong></div>
+            <div className="text-[10px]">Co. Prog.: 2022-STE-01208 - codice attività: 56144-338961</div>
+            <div className="text-[10px]">Attività: Laboratori di apprendimento collaborativo curriculari Agricoltura 4.0</div>
           </div>
         </div>
 
         {/* Main Content */}
-        <div className="flex" style={{ height: 'calc(100% - 120px)', marginTop: '10mm' }}>
+        <div className="flex" style={{ height: 'calc(100% - 80px)', marginTop: '5mm' }}>
           {/* Left Side - Student List */}
           <div className="flex-grow border-r border-gray-300">
             <table className="w-full">
               <thead>
                 <tr className="border-b border-gray-300">
-                  <th className="w-12 py-2 px-3 text-center border-r border-gray-300 text-sm">#</th>
-                  <th className="py-2 px-3 text-left border-r border-gray-300 text-sm">Studente</th>
-                  <th className="py-2 px-3 text-left text-sm">Presenza</th>
+                  <th className="w-8 py-1 px-2 text-center border-r border-gray-300 text-xs">#</th>
+                  <th className="py-1 px-2 text-left border-r border-gray-300 text-xs">Studente</th>
+                  <th className="py-1 px-2 text-left text-xs">Presenza</th>
                 </tr>
               </thead>
               <tbody>
                 {students.map((student, index) => (
                   <tr key={student.id} className="border-b border-gray-300">
-                    <td className="py-2 px-3 text-center border-r border-gray-300 text-sm">{index + 1}</td>
-                    <td className="py-2 px-3 border-r border-gray-300 text-sm">{student.name}</td>
-                    <td className="py-2 px-3 text-sm">
-                      <span className={`inline-block px-2 py-1 rounded ${
+                    <td className="py-1 px-2 text-center border-r border-gray-300 text-xs">{index + 1}</td>
+                    <td className="py-1 px-2 border-r border-gray-300 text-xs">{student.name}</td>
+                    <td className="py-1 px-2 text-xs">
+                      <span className={`inline-block px-1 rounded ${
                         attendanceMap[student.id] ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
                       }`}>{attendanceMap[student.id] ? 'Presente' : 'Assente'}</span>
                     </td>
@@ -87,16 +87,16 @@ const AttendanceReport = forwardRef<HTMLDivElement, AttendanceReportProps>(
           {/* Right Side - Activity and Signature */}
           <div style={{ width: '33%' }}>
             <div className="h-full flex flex-col">
-              <div className="p-3 border-b border-gray-300">
-                <div className="font-bold text-sm mb-2">Attività Svolta</div>
-                <div className="text-sm min-h-[150px]">{activity?.description}</div>
+              <div className="p-2 border-b border-gray-300">
+                <div className="font-bold text-xs mb-1">Attività Svolta</div>
+                <div className="text-xs min-h-[120px]">{activity?.description}</div>
               </div>
-              <div className="mt-auto p-3">
-                <div className="font-bold text-sm mb-2">FIRMA EDUCATORE/OPERATORE</div>
+              <div className="mt-auto p-2">
+                <div className="font-bold text-xs mb-1">FIRMA EDUCATORE/OPERATORE</div>
                 <img 
                   src="http://weblabfactory.it/lamiafirmapers24.png" 
                   alt="Firma" 
-                  style={{ width: '150px', height: 'auto' }}
+                  style={{ width: '120px', height: 'auto' }}
                 />
               </div>
             </div>
