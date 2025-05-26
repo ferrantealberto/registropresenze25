@@ -29,7 +29,7 @@ const AttendanceReport = forwardRef<HTMLDivElement, AttendanceReportProps>(
     return (
       <div ref={ref} className="bg-white" style={{ width: '297mm', height: '210mm', padding: '10mm', margin: 0 }}>
         {/* Header */}
-        <div className="border-b border-gray-300 pb-1">
+        <div className="border-b border-gray-300 pb-1 mb-2">
           <div className="flex items-start justify-between">
             <div className="flex items-center">
               <img 
@@ -57,7 +57,7 @@ const AttendanceReport = forwardRef<HTMLDivElement, AttendanceReportProps>(
         </div>
 
         {/* Main Content */}
-        <div className="flex" style={{ height: 'calc(100% - 80px)', marginTop: '5mm' }}>
+        <div className="flex" style={{ height: 'calc(100% - 100px)' }}>
           {/* Left Side - Student List */}
           <div className="flex-grow border-r border-gray-300">
             <table className="w-full">
@@ -87,16 +87,16 @@ const AttendanceReport = forwardRef<HTMLDivElement, AttendanceReportProps>(
           {/* Right Side - Activity and Signature */}
           <div style={{ width: '33%' }}>
             <div className="h-full flex flex-col">
-              <div className="p-2 border-b border-gray-300">
+              <div className="p-2 border-b border-gray-300" style={{ minHeight: '120px', maxHeight: '50%' }}>
                 <div className="font-bold text-xs mb-1">Attività Svolta</div>
-                <div className="text-xs min-h-[120px]">{activity?.description}</div>
+                <div className="text-xs">{activity?.description}</div>
               </div>
-              <div className="mt-auto p-2">
+              <div className="p-2 mt-auto">
                 <div className="font-bold text-xs mb-1">FIRMA EDUCATORE/OPERATORE</div>
                 <img 
                   src="http://weblabfactory.it/lamiafirmapers24.png" 
                   alt="Firma" 
-                  style={{ width: '120px', height: 'auto' }}
+                  style={{ width: '120px', height: 'auto', maxHeight: '40px', objectFit: 'contain' }}
                 />
               </div>
             </div>
